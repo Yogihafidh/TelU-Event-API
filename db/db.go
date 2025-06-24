@@ -4,7 +4,7 @@ import (
 	"database/sql"
 
 	// Import  driver (the SQLite)
-	_ "github.com/mattn/go-sqlite3"
+	_ "github.com/glebarez/go-sqlite"
 )
 
 var DB *sql.DB
@@ -12,7 +12,7 @@ var DB *sql.DB
 func InitDB() {
 	// Open a database connection. sql.Open does not directly open a connection, but sets up the connection configuration.
 	var err error
-	DB, err = sql.Open("sqlite3", "events.db")
+	DB, err = sql.Open("sqlite", "events.db")
 	if err != nil {
 		panic("could not connect to database")
 	}
@@ -32,10 +32,10 @@ func createTables() {
 		name TEXT NOT NULL,
 		description TEXT NOT NULL,
 		location TEXT NOT NULL,
-		datetime DATETIME NOT NULL,
+		dateTime DATETIME NOT NULL,
 		user_id INTEGER
 	);`
-	
+
 	// Execute the query to create the table
 	_, err := DB.Exec(query)
 	if err != nil {
