@@ -49,8 +49,10 @@ func GetAllEvents() ([]Event, error) {
 		return nil, err
 	}
 
+	// Close the query result connection once the function completes.
 	defer rows.Close()
 
+	// Empty slice to store all the events that we will take from the database
 	var events = []Event{}
 	for rows.Next() {
 		var event Event
@@ -62,4 +64,20 @@ func GetAllEvents() ([]Event, error) {
 	}
 
 	return events, nil
+}
+
+func GetEventByID(id int64) (*Event, error) {
+	query := `SELECT * FROM events WHERE id = ?`
+	row := db.DB.QueryRow(query, id)
+
+	// Empty slice to store the events that we will take from the database
+	var event Event
+	err := row.Scan(&event.ID, &event.Name, &event.Description, &event.Location, &event.DateTime, &event.UserID)
+	if err != nil {
+		return nil, err
+	}
+
+	// return pointer because if error occurs, we want to return nil
+	return &event, nil
+
 }
