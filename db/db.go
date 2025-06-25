@@ -7,6 +7,7 @@ import (
 	_ "github.com/glebarez/go-sqlite"
 )
 
+// DB global variable is of type pointer to sql.DB.
 var DB *sql.DB
 
 func InitDB() {
