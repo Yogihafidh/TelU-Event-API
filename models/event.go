@@ -5,6 +5,7 @@ import (
 	"time"
 )
 
+// Structs in Go function as temporary containers for data being processed – they can be used to store data from requests, fill in data from databases, and be used for operations (queries).
 type Event struct {
 	ID          int64
 	Name        string    `binding:"required"`
@@ -68,6 +69,8 @@ func GetAllEvents() ([]Event, error) {
 
 func GetEventByID(id int64) (*Event, error) {
 	query := `SELECT * FROM events WHERE id = ?`
+
+	// Query to select an event by ID from the database. Use the ? placeholder to prevent SQL Injection. The value will be safely inserted later via row.Scan().
 	row := db.DB.QueryRow(query, id)
 
 	// Empty slice to store the events that we will take from the database
@@ -80,4 +83,25 @@ func GetEventByID(id int64) (*Event, error) {
 	// return pointer because if error occurs, we want to return nil
 	return &event, nil
 
+}
+
+func (e Event) Update() error {
+	// Query to update an existing event in the database. Use the ? placeholder to prevent SQL Injection. The value will be safely inserted later via stmt.Exec().
+	query := `
+	UPDATE events 
+	SET name = ?, description = ?, location = ?, dateTime = ?
+	WHERE id = ?`
+
+	// Prepare the statement to prevent SQL injection and prepare SQL statements so that they can be executed many times efficiently
+	stmt, err := db.DB.Prepare(query)
+	if err != nil {
+		return err
+	}
+
+	// Closes the statement after the function completes (to free resources).
+	defer stmt.Close()
+
+	// Execute the prepared statement, with the values ​​from the Event struct. The values ​​(e.Name, etc.) will be safely bound to ? in the query.
+	_, err = stmt.Exec(e.Name, e.Description, e.Location, e.DateTime, e.ID)
+	return err
 }
