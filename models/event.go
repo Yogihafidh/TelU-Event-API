@@ -105,3 +105,20 @@ func (e Event) Update() error {
 	_, err = stmt.Exec(e.Name, e.Description, e.Location, e.DateTime, e.ID)
 	return err
 }
+
+func (e Event) Delete() error {
+	query := `DELETE FROM events WHERE id = ?`
+
+	// Prepare the statement to prevent SQL injection and prepare SQL statements so that they can be executed many times efficiently
+	stmt, err := db.DB.Prepare(query)
+	if err != nil {
+		return err
+	}
+
+	// Closes the statement after the function completes (to free resources).
+	defer stmt.Close()
+
+	// Execute the prepared statement, with the ID of the event to be deleted.
+	_, err = stmt.Exec(e.ID)
+	return err
+}
