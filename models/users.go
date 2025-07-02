@@ -56,3 +56,23 @@ func (u User) ExistsByEmail() (bool, error) {
 	err := db.DB.QueryRow(query, u.Email).Scan(&count)
 	return count > 0, err
 }
+
+func (u *User) ValidateCredentials() (bool, error) {
+	// SQL query to select the password from the users table where the email matches the provided email.
+	query := `SELECT id, password FROM users WHERE email = ?`
+
+	// Method QueryRow menjalankan query dan mengambil satu baris hasil. lalu method Scann akan membaca kolom hasil query (password) dari baris tersebut lalu enyalin nilainya ke variabel retrievedPassword.
+	var retrievedPassword string
+	err := db.DB.QueryRow(query, u.Email).Scan(&u.ID, &retrievedPassword)
+	if err != nil {
+		return false, err
+	}
+
+	// Verify the provided password against the retrieved password from the database.
+	isValid, err := utils.VerifyPassword(u.Password, retrievedPassword)
+	if err != nil {
+		return false, err
+	}
+
+	return isValid, nil
+}

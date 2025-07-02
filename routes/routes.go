@@ -1,13 +1,26 @@
 package routes
 
-import "github.com/gin-gonic/gin"
+import (
+	"telu-event-apps/middlewares"
+
+	"github.com/gin-gonic/gin"
+)
 
 // *gin.Engine is type gin.Default() return
 func RegisterRoutes(server *gin.Engine) {
 	server.GET("/events", getEvents)
 	server.GET("/events/:id", getEvent)
-	server.POST("/events", createEvents)
-	server.PUT("/events/:id", updateEvent)
-	server.DELETE("/events/:id", deleteEvent)
+
+	// Create a new group for authenticated routes
+	// This group will contain routes that require authentication
+	// The routes in this group will be prefixed with "/"
+	// and will use the Authenticate middleware
+	authenticated := server.Group("/")
+	authenticated.Use(middlewares.Authenticate) 
+	authenticated.POST("/events", createEvents)
+	authenticated.PUT("/events/:id", updateEvent)
+	authenticated.DELETE("/events/:id", deleteEvent)
+	
 	server.POST("/signup", signup)
+	server.POST("/login", login)
 }
