@@ -122,3 +122,20 @@ func (e Event) Delete() error {
 	_, err = stmt.Exec(e.ID)
 	return err
 }
+
+func (e *Event) Register(userID int64) error {
+	query := `
+	INSERT INTO registrations (event_id, user_id) 
+	VALUES (?, ?)`
+
+	// Prepare the statement to prevent SQL injection and prepare SQL statements so that they can be executed many times efficiently
+	stmt, err := db.DB.Prepare(query)
+	if err != nil {
+		return err
+	}
+
+	defer stmt.Close()
+
+	_, err = stmt.Exec(e.ID, userID)
+	return err
+}
