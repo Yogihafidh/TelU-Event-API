@@ -16,11 +16,13 @@ func RegisterRoutes(server *gin.Engine) {
 	// The routes in this group will be prefixed with "/"
 	// and will use the Authenticate middleware
 	authenticated := server.Group("/")
-	authenticated.Use(middlewares.Authenticate) 
+	authenticated.Use(middlewares.Authenticate)
 	authenticated.POST("/events", createEvents)
 	authenticated.PUT("/events/:id", updateEvent)
 	authenticated.DELETE("/events/:id", deleteEvent)
-	
+	authenticated.POST("/events/:id/register", registerForEvent)
+	authenticated.DELETE("/events/:id/register", cancleRegistration)
+
 	server.POST("/signup", signup)
 	server.POST("/login", login)
 }

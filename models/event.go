@@ -1,6 +1,7 @@
 package models
 
 import (
+	"errors"
 	"telu-event-apps/db"
 	"time"
 )
@@ -120,5 +121,58 @@ func (e Event) Delete() error {
 
 	// Execute the prepared statement, with the ID of the event to be deleted.
 	_, err = stmt.Exec(e.ID)
+	return err
+}
+
+func (e *Event) Register(userID int64) error {
+	query := `
+	INSERT INTO registrations (event_id, user_id) 
+	VALUES (?, ?)`
+
+	// Prepare the statement to prevent SQL injection and prepare SQL statements so that they can be executed many times efficiently
+	stmt, err := db.DB.Prepare(query)
+	if err != nil {
+		return err
+	}
+
+	// Closes the statement after the function completes (to free resources).
+	defer stmt.Close()
+
+	// Execute the prepared statement, with the ID of the event and user to register for the event.
+	_, err = stmt.Exec(e.ID, userID)
+	return err
+}
+
+func (e *Event) CancelRegistration(userID int64) error {
+	// DELETE does not error if there are no matching rows. You should check RowsAffected() to see if anything was deleted. This is standard behavior across all SQL engines (MySQL, PostgreSQL, SQLite, etc.).
+	query := `
+	DELETE FROM registrations 
+	WHERE event_id = ? AND user_id = ?`
+
+	// Prepare the statement to prevent SQL injection and prepare SQL statements so that they can be executed many times efficiently
+	stmt, err := db.DB.Prepare(query)
+	if err != nil {
+		return err
+	}
+
+	defer stmt.Close()
+
+	// Execute the prepared statement, with the ID of the event and user to cancel the registration.
+	res, err := stmt.Exec(e.ID, userID)
+	if err != nil {
+		return err
+	}
+
+	// Get the number of rows affected by the delete operation, because if no rows are affected, it means there was no registration to cancel.
+	rowsAffected, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	// If no rows were affected, it means there was no registration to cancel.
+	if rowsAffected == 0 {
+		return errors.New("no registration found to cancel")
+	}
+
 	return err
 }
