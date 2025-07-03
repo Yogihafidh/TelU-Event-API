@@ -144,7 +144,7 @@ func (e *Event) Register(userID int64) error {
 }
 
 func (e *Event) CancelRegistration(userID int64) error {
-	// Delete not return error, if no data is deleted, it will return 0 rows affected
+	// DELETE does not error if there are no matching rows. You should check RowsAffected() to see if anything was deleted. This is standard behavior across all SQL engines (MySQL, PostgreSQL, SQLite, etc.).
 	query := `
 	DELETE FROM registrations 
 	WHERE event_id = ? AND user_id = ?`
